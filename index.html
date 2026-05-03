@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- TODO: Set the document title to the name of your application -->
+    <title>GMU - ChatBot</title>
+    
+
+    <!-- TODO: Update og:title to match your application name -->
+    <meta property="og:title" content="GMU - ChatBot " />
+    <meta property="og:description" content="GMU ChatBot Project" />
+    <meta property="og:type" content="website" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Favicon / title logo (place your logo file at `public/gmu-logo.png`) -->
+    <link rel="icon" href="/gmu-logo.png" />
+    <link rel="apple-touch-icon" href="/gmu-logo.png" />
+    <style>
+      .gmu-voice-toggle {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #800000; /* maroon */
+        color: #D4AF37; /* gold */
+        border: 2px solid rgba(212,175,55,0.15);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        z-index: 9999;
+        cursor: pointer;
+      }
+      .gmu-voice-toggle:focus { outline: 3px solid rgba(212,175,55,0.22); }
+      .gmu-voice-toggle svg { width: 26px; height: 26px; fill: currentColor; }
+      .gmu-voice-toggle.muted { background: #3f0000; opacity: 0.95; }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Voice assistant toggle -->
+    <button id="gmuVoiceToggle" class="gmu-voice-toggle" aria-pressed="false" aria-label="Mute voice assistant">
+      <!-- speaker icon (unmuted) shown by default; JS will toggle icons -->
+      <svg id="gmuIconUnmuted" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 10v4h4l5 5V5L7 10H3z"></path>
+        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"></path>
+        <path d="M19 12c0 2.89-1.64 5.42-4.06 6.78l.94 1.46C19.02 19.94 21 16.22 21 12s-1.98-7.94-5.12-8.24l-.94 1.46C17.36 6.58 19 9.11 19 12z"></path>
+      </svg>
+      <svg id="gmuIconMuted" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none;">
+        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"/>
+        <path d="M3 10v4h4l5 5V5L7 10H3z"/>
+        <path d="M20.49 20.49L3.51 3.51 2.09 4.93 5.17 8H3v8h4l5 5v-6.17l7.83 7.83 1.41-1.41z"/>
+      </svg>
+    </button>
+
+    <script>
+      (function() {
+        const WELCOME_TEXT = "Welcome to GM University. Igniting innovation and inspiring transformation.";
+        const toggle = document.getElementById('gmuVoiceToggle');
+        const iconUnmuted = document.getElementById('gmuIconUnmuted');
+        const iconMuted = document.getElementById('gmuIconMuted');
+
+        // Use the same storage key as the React app so mute state stays in sync
+        const STORAGE_KEY = 'gm_tts_muted';
+        // Persist muted state across sessions; default is unmuted (false)
+        let muted = localStorage.getItem(STORAGE_KEY) === '1';
+        let hasPlayedOnLoad = false;
+        let currentUtterance = null;
+
+        function updateUI() {
+          if (!toggle) return;
+          toggle.classList.toggle('muted', muted);
+          toggle.setAttribute('aria-pressed', String(muted));
+          toggle.setAttribute('aria-label', muted ? 'Unmute voice assistant' : 'Mute voice assistant');
+          if (iconUnmuted && iconMuted) {
+            iconUnmuted.style.display = muted ? 'none' : '';
+            iconMuted.style.display = muted ? '' : 'none';
+          }
+        }
+
+        function speakWelcome() {
+          if (muted) return;
+          if (!('speechSynthesis' in window)) return;
+          // Do not re-play on the same page load
+          if (hasPlayedOnLoad) return;
+          // Also skip if React already spoke this session (avoid duplicate)
+          try {
+            if (sessionStorage.getItem('gmu_welcome_played') === '1') return;
+          } catch (e) {}
+          const utter = new SpeechSynthesisUtterance(WELCOME_TEXT);
+          utter.lang = 'en-US';
+          utter.rate = 1;
+          currentUtterance = utter;
+          window.speechSynthesis.speak(utter);
+          hasPlayedOnLoad = true;
+          try { sessionStorage.setItem('gmu_welcome_played', '1'); } catch (e) {}
+        }
+
+        function stopSpeaking() {
+          if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+          currentUtterance = null;
+        }
+
+        toggle.addEventListener('click', function() {
+          muted = !muted;
+          console.debug('[gmu] voice toggle clicked, new muted=', muted);
+          try { localStorage.setItem(STORAGE_KEY, muted ? '1' : '0'); } catch (e) {}
+          // notify React hooks/listeners about the change
+          try { window.dispatchEvent(new CustomEvent('gm_sound_changed', { detail: { muted } })); } catch (e) {}
+          updateUI();
+          if (muted) {
+            stopSpeaking();
+          } else {
+            // When unmuting, speak again immediately (only once per user action)
+            hasPlayedOnLoad = false;
+            console.debug('[gmu] unmuted via toggle, calling speakWelcome()');
+            speakWelcome();
+          }
+        });
+
+        // Init on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+          updateUI();
+          // Do NOT auto-speak on initial load even when unmuted. Only speak when
+          // the user explicitly unmutes (handled in the toggle click handler).
+        });
+      })();
+    </script>
+  </body>
+</html>
