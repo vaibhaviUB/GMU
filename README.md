@@ -8,7 +8,7 @@ This project has been developed in collaboration with the Robotics and Animation
 
 Live Website
 
-URL - https://gmuchatbox.netlify.app/
+https://gmuchatbox.netlify.app/
 
 Project Overview
 
@@ -19,12 +19,17 @@ The system is designed to:
 Provide quick and structured access to university information
 Minimize repetitive manual queries
 Deliver an interactive and responsive user experience through an AI chatbot
-Features
+
+
+
+Features --
 AI-powered chatbot for handling university-related queries
 Clean and intuitive dashboard interface
 Well-organized sections for easy navigation
 Touchscreen-friendly design suitable for interactive environments
-Sections Included
+
+
+Sections Included --
 About Us – Overview of the university, including vision and mission
 Programs – List of undergraduate and postgraduate courses
 Admissions – Admission process and eligibility overview
@@ -32,13 +37,17 @@ Placements – Placement support and career opportunities
 Library – Information about library facilities and resources
 Careers – Employment opportunities within the university
 Contact – Essential contact details and location information
-Key Highlights
+
+
+Key Highlights --
 Centralized access to essential information about GM University, Davanagere
 Designed for clarity, simplicity, and ease of use
 Structured content for quick readability and navigation
 Supports interactive query resolution through an AI chatbot
 Suitable for both web-based access and on-campus interactive systems
-Purpose
+
+
+Purpose --
 
 The primary objective of this project is to:
 
@@ -46,6 +55,8 @@ Provide a unified platform for accessing university information
 Enhance accessibility for students, visitors, and stakeholders
 Reduce dependency on manual information handling
 Present information in a clear, concise, and organized manner
-Note
 
-The content presented in this platform is summarized and adapted from publicly available information for the purpose of improving accessibility and user experience.
+
+Note --
+
+The content presented in this platform is summarized and adapted from publicly available sources for the purpose of improving accessibility and user experience.
